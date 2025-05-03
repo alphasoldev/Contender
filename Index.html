@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$CONTENDER - Solana Memecoin Tracker</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background-color: #0a192f;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 2px solid rgba(255, 0, 0, 0.5);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-placeholder {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed red;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff3e3e;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            color: #8892b0;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .social-btn {
+            background-color: transparent;
+            color: white;
+            border: 1px solid #ff3e3e;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .social-btn:hover {
+            background-color: rgba(255, 62, 62, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .buy-btn {
+            background-color: #ff3e3e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 1.2rem;
+            margin-top: 20px;
+            display: inline-block;
+        }
+        
+        .buy-btn:hover {
+            background-color: #ff6b6b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 62, 62, 0.4);
+        }
+        
+        main {
+            padding: 40px 0;
+        }
+        
+        .tracker-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            background-color: rgba(0, 20, 40, 0.7);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #ff3e3e;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+        
+        .map-container {
+            width: 100%;
+            height: 100%;
+            background: url('/api/placeholder/800/600') no-repeat center center;
+            background-size: cover;
+            position: relative;
+        }
+        
+        .radar-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 0, 0, 0.7);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        .radar-scanner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 50%;
+            background: linear-gradient(45deg, transparent 50%, rgba(255, 0, 0, 0.5) 50%);
+            transform-origin: bottom right;
+            animation: scan 4s linear infinite;
+        }
+        
+        .radar-ping {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 0, 0, 0.7);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: ping 2s ease-out infinite;
+        }
+        
+        .blip {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px red;
+        }
+        
+        .data-container {
+            margin-top: 30px;
+            background-color: rgba(0, 20, 40, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ff3e3e;
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 0;
+        }
+        
+        .data-label {
+            font-weight: bold;
+            color: #8892b0;
+        }
+        
+        .data-value {
+            color: #ff3e3e;
+            font-weight: bold;
+        }
+        
+        .status-container {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            background-color: #00ff00;
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px #00ff00;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-text {
+            font-weight: bold;
+            color: #00ff00;
+        }
+        
+        footer {
+            padding: 20px 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 0, 0, 0.5);
+            margin-top: 40px;
+        }
+        
+        .grid-line {
+            position: absolute;
+            background-color: rgba(255, 0, 0, 0.2);
+        }
+        
+        .horizontal {
+            width: 100%;
+            height: 1px;
+        }
+        
+        .vertical {
+            width: 1px;
+            height: 100%;
+        }
+        
+        @keyframes scan {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes ping {
+            0% {
+                opacity: 1;
+                width: 20px;
+                height: 20px;
+            }
+            100% {
+                opacity: 0;
+                width: 300px;
+                height: 300px;
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+            100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+        }
+        
+        .coordinates {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            color: #ff3e3e;
+            border: 1px solid #ff3e3e;
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-container {
+                flex-direction: column;
+                margin-bottom: 20px;
+            }
+            
+            .logo-placeholder {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .radar-container {
+                width: 300px;
+                height: 300px;
+            }
+            
+            .tracker-container {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <div class="logo-placeholder">
+                    <span>$CONTENDER LOGO</span>
+                </div>
+                <div>
+                    <h1 class="title">$CONTENDER</h1>
+                    <p class="subtitle">Solana Memecoin Swimming in the Deep</p>
+                </div>
+            </div>
+            <div class="social-links">
+                <a href="https://x.com/SharkContender/" class="social-btn">
+                    X (Twitter)
+                </a>
+                <a href="https://t.me/contendershark" class="social-btn">
+                    Telegram
+                </a>
+                <a href="https://pumpfun.io" class="buy-btn">BUY NOW</a>
+            </div>
+        </header>
+        
+        <main>
+            <div class="tracker-container">
+                <div class="map-container">
+                    <div class="radar-container">
+                        <!-- Grid lines -->
+                        <div class="grid-line horizontal" style="top: 50%;"></div>
+                        <div class="grid-line vertical" style="left: 50%;"></div>
+                        <div class="grid-line horizontal" style="top: 25%;"></div>
+                        <div class="grid-line horizontal" style="top: 75%;"></div>
+                        <div class="grid-line vertical" style="left: 25%;"></div>
+                        <div class="grid-line vertical" style="left: 75%;"></div>
+                        
+                        <div class="radar-scanner"></div>
+                        <div class="radar-ping" style="top: 50%; left: 50%;"></div>
+                        
+                        <!-- Contender blips will be generated by JS -->
+                    </div>
+                    
+                    <div class="coordinates">
+                        LAT: <span id="lat">28.32°N</span> | LONG: <span id="long">80.15°W</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-container">
+                <div class="status-indicator"></div>
+                <div class="status-text">TRACKING ACTIVE</div>
+            </div>
+            
+            <div class="data-container">
+                <div class="data-row">
+                    <span class="data-label">Last Spotted:</span>
+                    <span class="data-value" id="last-spotted">05/03/2025 12:42 UTC</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Current Depth:</span>
+                    <span class="data-value" id="depth">254m</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Speed:</span>
+                    <span class="data-value" id="speed">3.7 knots</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Distance Traveled:</span>
+                    <span class="data-value" id="distance">1,345 nautical miles</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Market Cap:</span>
+                    <span class="data-value" id="market-cap">$2,450,000</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">24h Volume:</span>
+                    <span class="data-value" id="volume">$785,120</span>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="https://www.ocearch.org/tracker/detail/contender" class="social-btn" target="_blank" style="display: inline-block;">
+                    View on OCEARCH Tracker
+                </a>
+            </div>
+        </main>
+        
+        <footer>
+            <p>$CONTENDER © 2025 | The first memecoin swimming the deep seas of Solana | Launched on pumpfun</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Create random blips on the radar
+        const radarContainer = document.querySelector('.radar-container');
+        const createBlips = () => {
+            // Clear existing blips
+            document.querySelectorAll('.blip').forEach(blip => blip.remove());
+            
+            // Create new blips
+            const blipCount = Math.floor(Math.random() * 3) + 2;
+            for (let i = 0; i < blipCount; i++) {
+                const blip = document.createElement('div');
+                blip.className = 'blip';
+                
+                // Random position within the radar
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 180;
+                const x = Math.cos(angle) * distance + 200;
+                const y = Math.sin(angle) * distance + 200;
+                
+                blip.style.left = `${x}px`;
+                blip.style.top = `${y}px`;
+                
+                radarContainer.appendChild(blip);
+            }
+            
+            // Always keep one blip near the center for our $CONTENDER
+            const contenderBlip = document.createElement('div');
+            contenderBlip.className = 'blip';
+            contenderBlip.style.left = `${195 + Math.random() * 10}px`;
+            contenderBlip.style.top = `${195 + Math.random() * 10}px`;
+            contenderBlip.style.backgroundColor = '#ff9900';
+            contenderBlip.style.boxShadow = '0 0 15px #ff9900';
+            contenderBlip.style.width = '15px';
+            contenderBlip.style.height = '15px';
+            radarContainer.appendChild(contenderBlip);
+        };
+        
+        // Update coordinates
+        const updateCoordinates = () => {
+            const latBase = 28.32;
+            const longBase = -80.15;
+            
+            const latVariation = (Math.random() * 0.1 - 0.05).toFixed(4);
+            const longVariation = (Math.random() * 0.1 - 0.05).toFixed(4);
+            
+            const newLat = (latBase + parseFloat(latVariation)).toFixed(4);
+            const newLong = (longBase + parseFloat(longVariation)).toFixed(4);
+            
+            document.getElementById('lat').textContent = `${newLat}°N`;
+            document.getElementById('long').textContent = `${Math.abs(newLong).toFixed(4)}°W`;
+        };
+        
+        // Update depth and speed
+        const updateStats = () => {
+            const depth = Math.floor(Math.random() * 300) + 150;
+            const speed = (Math.random() * 2 + 2.5).toFixed(1);
+            
+            document.getElementById('depth').textContent = `${depth}m`;
+            document.getElementById('speed').textContent = `${speed} knots`;
+            
+            // Update time
+            const now = new Date();
+            const formattedDate = `${now.getUTCMonth()+1}/${now.getUTCDate()}/${now.getUTCFullYear()} ${now.getUTCHours()}:${String(now.getUTCMinutes()).padStart(2, '0')} UTC`;
+            document.getElementById('last-spotted').textContent = formattedDate;
+            
+            // Update market data
+            const marketCapBase = 2450000;
+            const marketCapVar = Math.random() * 200000 - 100000;
+            const newMarketCap = Math.floor(marketCapBase + marketCapVar);
+            document.getElementById('market-cap').textContent = `$${newMarketCap.toLocaleString()}`;
+            
+            const volumeBase = 785120;
+            const volumeVar = Math.random() * 100000 - 50000;
+            const newVolume = Math.floor(volumeBase + volumeVar);
+            document.getElementById('volume').textContent = `$${newVolume.toLocaleString()}`;
+        };
+        
+        // Initial setup
+        createBlips();
+        updateCoordinates();
+        updateStats();
+        
+        // Set intervals for updates
+        setInterval(createBlips, 8000);
+        setInterval(updateCoordinates, 12000);
+        setInterval(updateStats, 15000);
+    </script>
+</body>
+</html>
